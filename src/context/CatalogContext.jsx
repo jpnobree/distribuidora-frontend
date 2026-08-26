@@ -93,7 +93,44 @@ export function CatalogProvider({ children }) {
     return created
   }, [])
 
-  const value = { products, categories, loading, error, reload: load, updateProduct, createProduct }
+  const uploadImage = useCallback(async (file, token) => {
+    const body = new FormData()
+    body.append('file', file)
+
+    let response
+    try {
+      response = await fetch(`${config.apiBaseUrl}/api/uploads`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      })
+    } catch {
+      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
+    }
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null)
+      throw new Error(
+        response.status === 401 || response.status === 403
+          ? 'Sua sessão expirou ou você não tem permissão para enviar imagens.'
+          : data?.error || 'Não foi possível enviar a imagem. Tente novamente.'
+      )
+    }
+
+    const data = await response.json()
+    return data.url
+  }, [])
+
+  const value = {
+    products,
+    categories,
+    loading,
+    error,
+    reload: load,
+    updateProduct,
+    createProduct,
+    uploadImage,
+  }
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
 }
