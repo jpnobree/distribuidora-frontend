@@ -24,11 +24,13 @@ export default function ProductImage({ src, name, className = '' }) {
   }
 
   return (
-    <img
-      src={src}
-      alt={name}
-      onError={() => setFailed(true)}
-      className={`object-cover ${className}`}
-    />
+    <div className={`flex items-center justify-center overflow-hidden bg-bg ${className}`}>
+      <img
+        src={src}
+        alt={name}
+        onError={() => setFailed(true)}
+        className="h-full w-full object-contain"
+      />
+    </div>
   )
 }
