@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Save, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Save, X, Upload } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCatalog } from '../context/CatalogContext'
+import ProductImage from './ProductImage'
 
 // Formulario usado pelo ADMIN tanto para criar um produto novo quanto para
 // editar um existente (passe `product` para editar; omita para criar).
@@ -9,8 +10,9 @@ import { useCatalog } from '../context/CatalogContext'
 // fixo, para nao quebrar o link/identificador do produto.
 export default function ProductForm({ product, onCancel, onSaved }) {
   const { token } = useAuth()
-  const { categories, updateProduct, createProduct } = useCatalog()
+  const { categories, updateProduct, createProduct, uploadImage } = useCatalog()
   const isEditing = Boolean(product)
+  const fileInputRef = useRef(null)
 
   const [form, setForm] = useState({
     slug: product?.id ?? '',
@@ -26,10 +28,28 @@ export default function ProductForm({ product, onCancel, onSaved }) {
     available: product?.available ?? true,
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // permite escolher o mesmo arquivo de novo depois
+    if (!file) return
+
+    setError('')
+    setUploading(true)
+    try {
+      const url = await uploadImage(file, token)
+      updateField('image', url)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleSubmit(e) {
@@ -160,16 +180,41 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium text-ink">
-            Imagem <span className="font-normal text-muted">(URL ou caminho em /images/...)</span>
-          </label>
-          <input
-            type="text"
-            value={form.image}
-            onChange={(e) => updateField('image', e.target.value)}
-            className="field"
-            placeholder="/images/produto.jpg"
-          />
+          <label className="mb-1 block text-sm font-medium text-ink">Imagem</label>
+          <div className="flex items-center gap-4">
+            <ProductImage
+              src={form.image}
+              name={form.name || 'Produto'}
+              className="h-20 w-20 shrink-0 rounded-md border border-border"
+            />
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="btn-secondary"
+              >
+                <Upload size={14} />
+                {uploading ? 'Enviando...' : form.image ? 'Trocar imagem' : 'Escolher arquivo'}
+              </button>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => updateField('image', '')}
+                  className="text-left text-xs font-medium text-muted underline-offset-2 hover:underline"
+                >
+                  Remover imagem
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="col-span-2">
@@ -207,7 +252,7 @@ export default function ProductForm({ product, onCancel, onSaved }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="flex gap-3">
-        <button type="submit" disabled={saving} className="btn-primary">
+        <button type="submit" disabled={saving || uploading} className="btn-primary">
           <Save size={16} />
           {saving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Criar produto'}
         </button>
