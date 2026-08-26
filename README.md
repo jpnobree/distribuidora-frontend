@@ -50,22 +50,22 @@ src/
 
 ## Produtos e categorias
 
-Não ficam mais em arquivos estáticos aqui no front-end — quem cadastra e
-edita é o **backend** (`distribuidora-backend`), autenticado como `ADMIN`
-(`POST`/`PUT`/`PATCH`/`DELETE /api/products`). Este projeto só consome esses
-dados via `GET /api/products` e `GET /api/categories` (ver
-`CatalogContext.jsx`).
-
-Para adicionar/editar produtos, use a API do backend diretamente (veja o
-README de `distribuidora-backend` para exemplos) — ainda não existe uma tela
-de administração no front-end.
+Não ficam mais em arquivos estáticos aqui no front-end — os dados moram no
+**backend** (`distribuidora-backend`). Um usuário logado como `ADMIN` pode
+cadastrar, editar e remover produtos direto pela interface (botão "Adicionar
+produto" no catálogo, e "Editar produto" ao abrir um produto existente), sem
+precisar chamar a API na mão. Esse projeto só consome os dados via
+`GET /api/products` e `GET /api/categories` (ver `CatalogContext.jsx`).
 
 ### Fotos dos produtos
 
-Coloque as imagens em `public/images/` e referencie como
-`image: '/images/picanha.jpg'`. Enquanto não houver foto (`image: null`, ou se
-o arquivo não for encontrado), o card mostra automaticamente um ícone com as
-iniciais do produto — não aparece nenhuma imagem quebrada.
+O `ADMIN` envia a foto direto pelo formulário de criar/editar produto
+("Escolher arquivo") — o arquivo vai para o backend (`POST /api/uploads`) e
+fica salvo em `distribuidora-backend/uploads`. Também dá pra apontar
+manualmente para um arquivo em `public/images/` (ex: `/images/picanha.jpg`),
+mas isso só funciona nesta instância do front-end. Enquanto não houver foto,
+o card mostra automaticamente um ícone com as iniciais do produto — não
+aparece nenhuma imagem quebrada.
 
 ## Identidade visual (cores, fontes, marca)
 
@@ -92,9 +92,6 @@ basta deixar esse campo em branco (`''`).
 
 ## Próximos passos sugeridos
 
-- Cadastrar os produtos reais via API do backend (o `DataSeeder` só cria
+- Cadastrar os produtos reais pela tela de admin (o `DataSeeder` só cria
   alguns produtos de exemplo na primeira execução).
 - Definir a identidade visual (cores/fontes/logo) em `index.css` e `config.js`.
-- Adicionar fotos reais em `public/images/`.
-- Construir uma tela de administração no front-end para o `ADMIN` cadastrar/
-  editar produtos sem precisar chamar a API na mão.
