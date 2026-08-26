@@ -63,7 +63,37 @@ export function CatalogProvider({ children }) {
     return updated
   }, [])
 
-  const value = { products, categories, loading, error, reload: load, updateProduct }
+  const createProduct = useCallback(async (payload, token) => {
+    let response
+    try {
+      response = await fetch(`${config.apiBaseUrl}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+    } catch {
+      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        response.status === 401 || response.status === 403
+          ? 'Sua sessão expirou ou você não tem permissão para criar produtos.'
+          : response.status === 409
+            ? 'Já existe um produto com esse identificador. Escolha outro.'
+            : 'Não foi possível criar o produto. Tente novamente.'
+      )
+    }
+
+    const created = await response.json()
+    setProducts((prev) => [...prev, created])
+    return created
+  }, [])
+
+  const value = { products, categories, loading, error, reload: load, updateProduct, createProduct }
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
 }

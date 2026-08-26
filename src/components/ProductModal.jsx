@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { X, MessageCircle, Pencil } from 'lucide-react'
 import ProductImage from './ProductImage'
-import ProductEditForm from './ProductEditForm'
+import ProductForm from './ProductForm'
 import { formatPrice, whatsappLink } from '../utils/format'
 import config from '../config'
 import { useCatalog } from '../context/CatalogContext'
@@ -51,7 +51,7 @@ export default function ProductModal({ product, onClose }) {
 
         <div className="flex flex-col gap-4 p-6">
           {editing ? (
-            <ProductEditForm
+            <ProductForm
               product={product}
               onCancel={() => setEditing(false)}
               onSaved={() => {

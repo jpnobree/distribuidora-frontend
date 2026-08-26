@@ -3,24 +3,27 @@ import { Save, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCatalog } from '../context/CatalogContext'
 
-// Formulario de edicao usado pelo ADMIN dentro do ProductModal, no lugar do
-// botao "Solicitar orcamento". O slug (id do produto) nao e editavel aqui
-// para nao quebrar o link/identificador do produto.
-export default function ProductEditForm({ product, onCancel, onSaved }) {
+// Formulario usado pelo ADMIN tanto para criar um produto novo quanto para
+// editar um existente (passe `product` para editar; omita para criar).
+// O slug (id do produto) so pode ser definido na criacao - depois disso fica
+// fixo, para nao quebrar o link/identificador do produto.
+export default function ProductForm({ product, onCancel, onSaved }) {
   const { token } = useAuth()
-  const { categories, updateProduct } = useCatalog()
+  const { categories, updateProduct, createProduct } = useCatalog()
+  const isEditing = Boolean(product)
 
   const [form, setForm] = useState({
-    sku: product.sku ?? '',
-    name: product.name ?? '',
-    category: product.category ?? '',
-    unit: product.unit ?? '',
-    price: product.price ?? '',
-    tags: (product.tags ?? []).join(', '),
-    image: product.image ?? '',
-    description: product.description ?? '',
-    origin: product.origin ?? '',
-    available: product.available ?? true,
+    slug: product?.id ?? '',
+    sku: product?.sku ?? '',
+    name: product?.name ?? '',
+    category: product?.category ?? categories[0]?.slug ?? '',
+    unit: product?.unit ?? '',
+    price: product?.price ?? '',
+    tags: (product?.tags ?? []).join(', '),
+    image: product?.image ?? '',
+    description: product?.description ?? '',
+    origin: product?.origin ?? '',
+    available: product?.available ?? true,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -35,7 +38,7 @@ export default function ProductEditForm({ product, onCancel, onSaved }) {
     setSaving(true)
     try {
       const payload = {
-        slug: product.id,
+        slug: isEditing ? product.id : form.slug.trim(),
         sku: form.sku,
         name: form.name,
         category: form.category,
@@ -50,8 +53,10 @@ export default function ProductEditForm({ product, onCancel, onSaved }) {
         origin: form.origin,
         available: form.available,
       }
-      const updated = await updateProduct(product.id, payload, token)
-      onSaved(updated)
+      const saved = isEditing
+        ? await updateProduct(product.id, payload, token)
+        : await createProduct(payload, token)
+      onSaved(saved)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -62,6 +67,22 @@ export default function ProductEditForm({ product, onCancel, onSaved }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
+        {!isEditing && (
+          <div className="col-span-2">
+            <label className="mb-1 block text-sm font-medium text-ink">
+              Identificador <span className="font-normal text-muted">(único, sem espaços, ex: picanha-premium-98562)</span>
+            </label>
+            <input
+              type="text"
+              value={form.slug}
+              onChange={(e) => updateField('slug', e.target.value)}
+              className="field"
+              placeholder="picanha-premium-98562"
+              required
+            />
+          </div>
+        )}
+
         <div className="col-span-2">
           <label className="mb-1 block text-sm font-medium text-ink">Nome</label>
           <input
@@ -188,7 +209,7 @@ export default function ProductEditForm({ product, onCancel, onSaved }) {
       <div className="flex gap-3">
         <button type="submit" disabled={saving} className="btn-primary">
           <Save size={16} />
-          {saving ? 'Salvando...' : 'Salvar alterações'}
+          {saving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Criar produto'}
         </button>
         <button type="button" onClick={onCancel} disabled={saving} className="btn-secondary">
           <X size={16} />

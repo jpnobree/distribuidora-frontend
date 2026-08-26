@@ -1,11 +1,14 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import FilterBar from '../components/FilterBar'
 import ProductGrid from '../components/ProductGrid'
 import EmptyState from '../components/EmptyState'
 import ProductModal from '../components/ProductModal'
+import AddProductModal from '../components/AddProductModal'
 import CatalogStatus from '../components/CatalogStatus'
 import { useCatalog } from '../context/CatalogContext'
+import { useAuth } from '../context/AuthContext'
 
 function sortProducts(list, sort) {
   const sorted = [...list]
@@ -24,7 +27,9 @@ function sortProducts(list, sort) {
 export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selected, setSelected] = useState(null)
+  const [creating, setCreating] = useState(false)
   const { products, categories, loading, error, reload } = useCatalog()
+  const { isAdmin } = useAuth()
 
   const activeCategory = searchParams.get('categoria') || ''
   const search = searchParams.get('busca') || ''
@@ -93,9 +98,17 @@ export default function Catalog() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 font-display text-3xl font-semibold text-ink">
-        {activeCategoryName || 'Todos os produtos'}
-      </h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-3xl font-semibold text-ink">
+          {activeCategoryName || 'Todos os produtos'}
+        </h1>
+        {isAdmin && (
+          <button type="button" onClick={() => setCreating(true)} className="btn-primary">
+            <Plus size={16} />
+            Adicionar produto
+          </button>
+        )}
+      </div>
 
       <CatalogStatus loading={loading} error={error} onRetry={reload}>
         <FilterBar
@@ -121,6 +134,10 @@ export default function Catalog() {
       </CatalogStatus>
 
       <ProductModal product={selected} onClose={() => setSelected(null)} />
+
+      {creating && (
+        <AddProductModal onClose={() => setCreating(false)} onCreated={() => setCreating(false)} />
+      )}
     </div>
   )
 }
