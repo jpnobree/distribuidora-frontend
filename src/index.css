@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   TEMA — troque só estas variáveis quando a identidade visual for definida.
+   Nada mais no projeto precisa mudar: cards, botões, tags etc. leem daqui.
+   ========================================================================== */
+:root {
+  --color-bg: #f5f5f2;         /* fundo geral da página */
+  --color-surface: #ffffff;    /* fundo de cards e superfícies */
+  --color-ink: #1f2420;        /* texto principal */
+  --color-muted: #6b6f68;      /* texto secundário */
+  --color-border: #e4e1d8;     /* linhas e bordas sutis */
+  --color-accent: #3f5b45;     /* cor de marca — botões, links, destaques */
+  --color-accent-ink: #ffffff; /* texto sobre a cor de marca */
+  --color-gold: #b08d57;       /* selo "premium" / destaque secundário */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-bg text-ink font-body antialiased;
+}
+
+@layer components {
+  /* "Etiqueta de caixote": o detalhe assinatura do catálogo — um recorte no
+     canto do card que carrega o SKU, como uma etiqueta presa a uma caixa. */
+  .crate-tag {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .category-pill {
+    @apply whitespace-nowrap rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-ink transition-colors hover:border-accent hover:text-accent;
+  }
+
+  .category-pill.is-active {
+    @apply border-accent bg-accent text-accent-ink;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent;
+  }
+
+  .field {
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+  }
+}
+
+/* scrollbar discreta nas seções de rolagem horizontal */
+.scroll-row::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-row::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
