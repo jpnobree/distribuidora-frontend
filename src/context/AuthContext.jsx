@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import config from '../config'
+import { api, ApiError } from '../api/client'
 
 const STORAGE_KEY = 'distribuidora_auth'
 
@@ -26,26 +26,13 @@ export function AuthProvider({ children }) {
   }, [auth])
 
   async function login(username, password) {
-    let response
+    let data
     try {
-      response = await fetch(`${config.apiBaseUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      })
-    } catch {
-      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
+      data = await api.post('/api/auth/login', { username, password })
+    } catch (err) {
+      throw new Error(loginErrorMessage(err))
     }
 
-    if (!response.ok) {
-      throw new Error(
-        response.status === 401
-          ? 'Usuário ou senha inválidos.'
-          : 'Não foi possível entrar. Tente novamente.'
-      )
-    }
-
-    const data = await response.json()
     setAuth(data)
     return data
   }
@@ -63,6 +50,13 @@ export function AuthProvider({ children }) {
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+function loginErrorMessage(err) {
+  if (!(err instanceof ApiError)) return 'Não foi possível entrar. Tente novamente.'
+  if (err.status === 0) return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
+  if (err.status === 401) return 'Usuário ou senha inválidos.'
+  return 'Não foi possível entrar. Tente novamente.'
 }
 
 export function useAuth() {
