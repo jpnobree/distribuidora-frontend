@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import config from '../config'
+import { api, ApiError } from '../api/client'
 
 const CatalogContext = createContext(null)
 
@@ -13,17 +13,12 @@ export function CatalogProvider({ children }) {
     setLoading(true)
     setError('')
     try {
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`${config.apiBaseUrl}/api/products`),
-        fetch(`${config.apiBaseUrl}/api/categories`),
+      const [productsData, categoriesData] = await Promise.all([
+        api.get('/api/products'),
+        api.get('/api/categories'),
       ])
-
-      if (!productsRes.ok || !categoriesRes.ok) {
-        throw new Error('resposta invalida do servidor')
-      }
-
-      setProducts(await productsRes.json())
-      setCategories(await categoriesRes.json())
+      setProducts(productsData)
+      setCategories(categoriesData)
     } catch {
       setError('Não foi possível carregar o catálogo. Verifique se o backend está rodando.')
     } finally {
@@ -36,59 +31,31 @@ export function CatalogProvider({ children }) {
   }, [load])
 
   const updateProduct = useCallback(async (slug, payload, token) => {
-    let response
+    let updated
     try {
-      response = await fetch(`${config.apiBaseUrl}/api/products/${slug}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
-    } catch {
-      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
-    }
-
-    if (!response.ok) {
+      updated = await api.put(`/api/products/${slug}`, payload, { token })
+    } catch (err) {
       throw new Error(
-        response.status === 401 || response.status === 403
-          ? 'Sua sessão expirou ou você não tem permissão para editar produtos.'
-          : 'Não foi possível salvar as alterações. Tente novamente.'
+        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para editar produtos.') ??
+          'Não foi possível salvar as alterações. Tente novamente.'
       )
     }
-
-    const updated = await response.json()
     setProducts((prev) => prev.map((p) => (p.id === slug ? updated : p)))
     return updated
   }, [])
 
   const createProduct = useCallback(async (payload, token) => {
-    let response
+    let created
     try {
-      response = await fetch(`${config.apiBaseUrl}/api/products`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
-    } catch {
-      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
-    }
-
-    if (!response.ok) {
+      created = await api.post('/api/products', payload, { token })
+    } catch (err) {
       throw new Error(
-        response.status === 401 || response.status === 403
-          ? 'Sua sessão expirou ou você não tem permissão para criar produtos.'
-          : response.status === 409
+        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para criar produtos.') ??
+          (err instanceof ApiError && err.status === 409
             ? 'Já existe um produto com esse identificador. Escolha outro.'
-            : 'Não foi possível criar o produto. Tente novamente.'
+            : 'Não foi possível criar o produto. Tente novamente.')
       )
     }
-
-    const created = await response.json()
     setProducts((prev) => [...prev, created])
     return created
   }, [])
@@ -97,28 +64,16 @@ export function CatalogProvider({ children }) {
     const body = new FormData()
     body.append('file', file)
 
-    let response
     try {
-      response = await fetch(`${config.apiBaseUrl}/api/uploads`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body,
-      })
-    } catch {
-      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
-    }
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => null)
+      const data = await api.post('/api/uploads', body, { token, isFormData: true })
+      return data.url
+    } catch (err) {
       throw new Error(
-        response.status === 401 || response.status === 403
-          ? 'Sua sessão expirou ou você não tem permissão para enviar imagens.'
-          : data?.error || 'Não foi possível enviar a imagem. Tente novamente.'
+        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para enviar imagens.') ??
+          (err instanceof ApiError && err.data?.error) ??
+          'Não foi possível enviar a imagem. Tente novamente.'
       )
     }
-
-    const data = await response.json()
-    return data.url
   }, [])
 
   const value = {
@@ -133,6 +88,16 @@ export function CatalogProvider({ children }) {
   }
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
+}
+
+// Mensagem compartilhada pelas acoes de ADMIN: rede fora do ar ou sessao sem
+// permissao (401/403). Devolve null quando nao se aplica, para o chamador
+// decidir a mensagem especifica daquele endpoint.
+function authOrNetworkMessage(err, forbiddenMessage) {
+  if (!(err instanceof ApiError)) return null
+  if (err.status === 0) return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
+  if (err.status === 401 || err.status === 403) return forbiddenMessage
+  return null
 }
 
 export function useCatalog() {

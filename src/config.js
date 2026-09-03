@@ -4,9 +4,9 @@ const config = {
   companyName: 'Real Frios',
   tagline: 'Catálogo de produtos para o seu negócio',
 
-  // Endereço do backend (projeto distribuidora-backend). Troque para a URL
-  // real quando publicar a API.
-  apiBaseUrl: 'http://localhost:8080',
+  // Endereço do backend (projeto distribuidora-backend). Vem da variável de
+  // ambiente VITE_API_BASE_URL (ver .env / .env.example) — troque lá, não aqui.
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
 
   // Usado no botão "Solicitar orçamento" dos produtos (formato internacional,
   // só números). Deixe vazio ('') para esconder o botão de WhatsApp.

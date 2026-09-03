@@ -7,10 +7,10 @@ preços e solicita orçamento por WhatsApp/e-mail, ou entra em contato pelo
 site depois de logar.
 
 Os produtos e categorias vêm do backend (projeto `distribuidora-backend`) via
-API — **é necessário ter o backend rodando** para o catálogo carregar (ver
-`config.apiBaseUrl` em `src/config.js`). Também existe uma tela de login
-(`/login`), com papéis `ADMIN` (cadastra/edita produtos) e `USER` (visualiza
-e fala com um vendedor).
+API — **é necessário ter o backend rodando** para o catálogo carregar.
+Também existe uma tela de login (`/login`), com papéis `ADMIN` (cadastra/edita
+produtos) e `USER` (visualiza e fala com um vendedor). Ver arquitetura
+completa no README do `distribuidora-backend`.
 
 ## Como rodar
 
@@ -20,8 +20,9 @@ Pré-requisitos:
   uma mensagem de erro em vez dos produtos.
 
 ```bash
-npm install      # instala as dependências (só na primeira vez)
-npm run dev      # inicia o servidor local (geralmente em http://localhost:5173)
+cp .env.example .env   # ajuste VITE_API_BASE_URL se o backend não estiver em localhost:8080
+npm install             # instala as dependências (só na primeira vez)
+npm run dev              # inicia o servidor local (geralmente em http://localhost:5173)
 ```
 
 Para gerar a versão de produção (arquivos estáticos prontos para publicar):
@@ -34,18 +35,36 @@ npm run preview  # visualiza o build de produção localmente
 A pasta `dist/` pode ser publicada em qualquer hospedagem de site estático
 (Vercel, Netlify, Cloudflare Pages, um servidor próprio, etc.).
 
+## Testes
+
+Testes de componente com **Vitest + Testing Library**, cobrindo os dois
+fluxos mais críticos do site: login e o formulário de criar/editar produto
+do admin.
+
+```bash
+npm test           # roda uma vez
+npm run test:watch # modo observador, roda de novo a cada save
+```
+
+| Arquivo | O que é coberto |
+|---|---|
+| `Login.test.jsx` | preencher credenciais padrão, login com sucesso, backend fora do ar, credenciais inválidas |
+| `ProductForm.test.jsx` | modo criação (campo Identificador, payload enviado), modo edição (mantém o slug original), erro do backend, cancelar |
+
 ## Estrutura do projeto
 
 ```
 src/
+  api/client.js   # unico ponto de fetch: URL base, header de auth, tratamento de erro
   components/   # peças de UI reutilizáveis (card de produto, header, modal...)
   pages/        # páginas roteadas: Home ("/"), Catálogo ("/catalogo"), Login ("/login")
   context/
     AuthContext.jsx     # login/logout, token JWT, papel do usuário
-    CatalogContext.jsx  # busca produtos/categorias na API do backend
+    CatalogContext.jsx  # produtos/categorias e as ações de admin (criar/editar/upload)
   utils/format.js # formatação de preço, link de WhatsApp etc.
-  config.js       # nome da empresa, telefone, WhatsApp, e-mail, URL da API
+  config.js       # nome da empresa, telefone, WhatsApp, e-mail — apiBaseUrl vem do .env
   index.css       # ponto único das cores/tema (ver "Identidade visual")
+.env.example      # copie para .env — VITE_API_BASE_URL aponta para o backend
 ```
 
 ## Produtos e categorias
