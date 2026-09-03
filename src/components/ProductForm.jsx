@@ -89,10 +89,11 @@ export default function ProductForm({ product, onCancel, onSaved }) {
       <div className="grid grid-cols-2 gap-4">
         {!isEditing && (
           <div className="col-span-2">
-            <label className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="product-slug" className="mb-1 block text-sm font-medium text-ink">
               Identificador <span className="font-normal text-muted">(único, sem espaços, ex: picanha-premium-98562)</span>
             </label>
             <input
+              id="product-slug"
               type="text"
               value={form.slug}
               onChange={(e) => updateField('slug', e.target.value)}
@@ -104,8 +105,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         )}
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium text-ink">Nome</label>
+          <label htmlFor="product-name" className="mb-1 block text-sm font-medium text-ink">Nome</label>
           <input
+            id="product-name"
             type="text"
             value={form.name}
             onChange={(e) => updateField('name', e.target.value)}
@@ -115,8 +117,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">SKU</label>
+          <label htmlFor="product-sku" className="mb-1 block text-sm font-medium text-ink">SKU</label>
           <input
+            id="product-sku"
             type="text"
             value={form.sku}
             onChange={(e) => updateField('sku', e.target.value)}
@@ -126,8 +129,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Categoria</label>
+          <label htmlFor="product-category" className="mb-1 block text-sm font-medium text-ink">Categoria</label>
           <select
+            id="product-category"
             value={form.category}
             onChange={(e) => updateField('category', e.target.value)}
             className="field"
@@ -142,8 +146,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Unidade</label>
+          <label htmlFor="product-unit" className="mb-1 block text-sm font-medium text-ink">Unidade</label>
           <input
+            id="product-unit"
             type="text"
             value={form.unit}
             onChange={(e) => updateField('unit', e.target.value)}
@@ -154,8 +159,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Preço (R$)</label>
+          <label htmlFor="product-price" className="mb-1 block text-sm font-medium text-ink">Preço (R$)</label>
           <input
+            id="product-price"
             type="number"
             step="0.01"
             min="0"
@@ -167,10 +173,11 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium text-ink">
+          <label htmlFor="product-tags" className="mb-1 block text-sm font-medium text-ink">
             Tags <span className="font-normal text-muted">(separadas por vírgula)</span>
           </label>
           <input
+            id="product-tags"
             type="text"
             value={form.tags}
             onChange={(e) => updateField('tags', e.target.value)}
@@ -218,8 +225,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium text-ink">Descrição</label>
+          <label htmlFor="product-description" className="mb-1 block text-sm font-medium text-ink">Descrição</label>
           <textarea
+            id="product-description"
             value={form.description}
             onChange={(e) => updateField('description', e.target.value)}
             className="field min-h-24 resize-y"
@@ -227,8 +235,9 @@ export default function ProductForm({ product, onCancel, onSaved }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Origem</label>
+          <label htmlFor="product-origin" className="mb-1 block text-sm font-medium text-ink">Origem</label>
           <input
+            id="product-origin"
             type="text"
             value={form.origin}
             onChange={(e) => updateField('origin', e.target.value)}
