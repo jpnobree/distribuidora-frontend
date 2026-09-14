@@ -4,9 +4,11 @@ import { describe, test, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../context/AuthContext', () => ({ useAuth: vi.fn() }))
 vi.mock('../context/CatalogContext', () => ({ useCatalog: vi.fn() }))
+vi.mock('../context/ToastContext', () => ({ useToast: vi.fn() }))
 
 import { useAuth } from '../context/AuthContext'
 import { useCatalog } from '../context/CatalogContext'
+import { useToast } from '../context/ToastContext'
 import ProductForm from './ProductForm'
 
 const categories = [
@@ -16,18 +18,24 @@ const categories = [
 
 let createProduct
 let updateProduct
+let deleteProduct
+let showToast
 
 beforeEach(() => {
   createProduct = vi.fn().mockResolvedValue({ id: 'novo-produto-teste' })
   updateProduct = vi.fn().mockResolvedValue({ id: 'produto-existente' })
+  deleteProduct = vi.fn().mockResolvedValue(undefined)
+  showToast = vi.fn()
 
   useAuth.mockReturnValue({ token: 'fake-token' })
   useCatalog.mockReturnValue({
     categories,
     createProduct,
     updateProduct,
+    deleteProduct,
     uploadImage: vi.fn(),
   })
+  useToast.mockReturnValue({ showToast })
 })
 
 describe('ProductForm - modo criação', () => {
@@ -62,6 +70,7 @@ describe('ProductForm - modo criação', () => {
     })
     expect(token).toBe('fake-token')
     expect(onSaved).toHaveBeenCalledWith({ id: 'novo-produto-teste' })
+    expect(showToast).toHaveBeenCalledWith('Produto criado com sucesso.')
   })
 
   test('mostra mensagem de erro e nao chama onSaved quando createProduct falha', async () => {
@@ -115,6 +124,32 @@ describe('ProductForm - modo edição', () => {
     expect(payload.slug).toBe('produto-existente')
     expect(payload.name).toBe('Produto Editado')
     expect(onSaved).toHaveBeenCalledWith({ id: 'produto-existente' })
+    expect(showToast).toHaveBeenCalledWith('Produto atualizado com sucesso.')
+  })
+
+  test('excluir exige dois cliques (confirmação) antes de chamar deleteProduct', async () => {
+    const user = userEvent.setup()
+    const onDeleted = vi.fn()
+    render(<ProductForm product={produtoExistente} onCancel={vi.fn()} onSaved={vi.fn()} onDeleted={onDeleted} />)
+
+    const deleteButton = screen.getByRole('button', { name: /excluir produto/i })
+
+    // primeiro clique so arma a confirmacao, ainda nao chama o backend
+    await user.click(deleteButton)
+    expect(deleteProduct).not.toHaveBeenCalled()
+    expect(screen.getByText(/excluir definitivamente/i)).toBeInTheDocument()
+
+    // segundo clique (agora "Confirmar exclusão") de fato exclui
+    await user.click(screen.getByRole('button', { name: /confirmar exclusão/i }))
+
+    expect(deleteProduct).toHaveBeenCalledWith('produto-existente', 'fake-token')
+    expect(showToast).toHaveBeenCalledWith('Produto removido com sucesso.')
+    expect(onDeleted).toHaveBeenCalledTimes(1)
+  })
+
+  test('botão "Excluir produto" não aparece no modo criação', () => {
+    render(<ProductForm onCancel={vi.fn()} onSaved={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: /excluir produto/i })).not.toBeInTheDocument()
   })
 })
 

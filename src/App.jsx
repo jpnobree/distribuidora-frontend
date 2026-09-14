@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
 import Login from './pages/Login'
+import AdminDashboard from './pages/AdminDashboard'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalog />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/painel" element={<AdminDashboard />} />
         </Routes>
       </main>
       <Footer />

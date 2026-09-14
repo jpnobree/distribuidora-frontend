@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Phone, LogIn, LogOut, ShieldCheck } from 'lucide-react'
+import { Search, Phone, LogIn, LogOut, ShieldCheck, LayoutDashboard } from 'lucide-react'
 import config from '../config'
 import { useAuth } from '../context/AuthContext'
 
@@ -48,6 +48,16 @@ export default function Header() {
               {isAdmin && <ShieldCheck size={16} className="text-accent" />}
               {user.username}
             </span>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => navigate('/painel')}
+                className="btn-secondary px-3 py-1.5"
+              >
+                <LayoutDashboard size={14} />
+                Painel
+              </button>
+            )}
             <button
               type="button"
               onClick={logout}
