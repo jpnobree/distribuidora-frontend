@@ -1,0 +1,11 @@
+# Sobe so o front-end (nginx servindo os arquivos estaticos). O backend
+# fica no repositorio distribuidora-backend, que tem seu proprio
+# docker-compose.yml (backend + Postgres) - suba ele primeiro.
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5173:80"
