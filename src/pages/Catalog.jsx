@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, ChevronDown } from 'lucide-react'
 import FilterBar from '../components/FilterBar'
 import ProductGrid from '../components/ProductGrid'
 import EmptyState from '../components/EmptyState'
@@ -28,7 +28,7 @@ export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selected, setSelected] = useState(null)
   const [creating, setCreating] = useState(false)
-  const { products, categories, loading, error, reload } = useCatalog()
+  const { products, categories, loading, error, reload, hasMore, loadingMore, loadMore } = useCatalog()
   const { isAdmin } = useAuth()
 
   const activeCategory = searchParams.get('categoria') || ''
@@ -131,6 +131,15 @@ export default function Catalog() {
             <EmptyState onClear={clearFilters} />
           )}
         </div>
+
+        {hasMore && (
+          <div className="flex justify-center pt-8">
+            <button type="button" onClick={() => loadMore()} disabled={loadingMore} className="btn-secondary">
+              <ChevronDown size={16} />
+              {loadingMore ? 'Carregando...' : 'Carregar mais produtos'}
+            </button>
+          </div>
+        )}
       </CatalogStatus>
 
       <ProductModal product={selected} onClose={() => setSelected(null)} />
