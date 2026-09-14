@@ -1,53 +1,58 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext } from 'react'
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '../api/client'
 
 const CatalogContext = createContext(null)
 
+// Tamanho de pagina do catalogo. O backend aceita paginacao real
+// (GET /api/products?page=&size=); aqui pedimos um pouco mais que o
+// catalogo atual costuma ter, entao no dia a dia tudo cabe na primeira
+// pagina - mas assim que o catalogo passar disso, o botao "Carregar mais"
+// (ver Catalog.jsx) busca o resto sem recarregar a pagina.
+const PAGE_SIZE = 24
+
 export function CatalogProvider({ children }) {
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const queryClient = useQueryClient()
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError('')
+  const productsQuery = useInfiniteQuery({
+    queryKey: ['products'],
+    queryFn: ({ pageParam }) => api.get(`/api/products?page=${pageParam}&size=${PAGE_SIZE}`),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.page + 1 < lastPage.totalPages ? lastPage.page + 1 : undefined,
+  })
+
+  const categoriesQuery = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api.get('/api/categories'),
+  })
+
+  const invalidateProducts = () => queryClient.invalidateQueries({ queryKey: ['products'] })
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({ slug, payload, token }) => api.put(`/api/products/${slug}`, payload, { token }),
+    onSuccess: invalidateProducts,
+  })
+
+  const createProductMutation = useMutation({
+    mutationFn: ({ payload, token }) => api.post('/api/products', payload, { token }),
+    onSuccess: invalidateProducts,
+  })
+
+  async function updateProduct(slug, payload, token) {
     try {
-      const [productsData, categoriesData] = await Promise.all([
-        api.get('/api/products'),
-        api.get('/api/categories'),
-      ])
-      setProducts(productsData)
-      setCategories(categoriesData)
-    } catch {
-      setError('Não foi possível carregar o catálogo. Verifique se o backend está rodando.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  const updateProduct = useCallback(async (slug, payload, token) => {
-    let updated
-    try {
-      updated = await api.put(`/api/products/${slug}`, payload, { token })
+      return await updateProductMutation.mutateAsync({ slug, payload, token })
     } catch (err) {
       throw new Error(
         authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para editar produtos.') ??
           'Não foi possível salvar as alterações. Tente novamente.'
       )
     }
-    setProducts((prev) => prev.map((p) => (p.id === slug ? updated : p)))
-    return updated
-  }, [])
+  }
 
-  const createProduct = useCallback(async (payload, token) => {
-    let created
+  async function createProduct(payload, token) {
     try {
-      created = await api.post('/api/products', payload, { token })
+      return await createProductMutation.mutateAsync({ payload, token })
     } catch (err) {
       throw new Error(
         authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para criar produtos.') ??
@@ -56,14 +61,11 @@ export function CatalogProvider({ children }) {
             : 'Não foi possível criar o produto. Tente novamente.')
       )
     }
-    setProducts((prev) => [...prev, created])
-    return created
-  }, [])
+  }
 
-  const uploadImage = useCallback(async (file, token) => {
+  async function uploadImage(file, token) {
     const body = new FormData()
     body.append('file', file)
-
     try {
       const data = await api.post('/api/uploads', body, { token, isFormData: true })
       return data.url
@@ -74,17 +76,40 @@ export function CatalogProvider({ children }) {
           'Não foi possível enviar a imagem. Tente novamente.'
       )
     }
-  }, [])
+  }
+
+  async function deleteProduct(slug, token) {
+    try {
+      await api.delete(`/api/products/${slug}`, { token })
+    } catch (err) {
+      throw new Error(
+        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para remover produtos.') ??
+          'Não foi possível remover o produto. Tente novamente.'
+      )
+    }
+    invalidateProducts()
+  }
+
+  const products = productsQuery.data?.pages.flatMap((page) => page.content) ?? []
+  const isLoading = productsQuery.isLoading || categoriesQuery.isLoading
+  const isError = productsQuery.isError || categoriesQuery.isError
 
   const value = {
     products,
-    categories,
-    loading,
-    error,
-    reload: load,
+    categories: categoriesQuery.data ?? [],
+    loading: isLoading,
+    error: isError ? 'Não foi possível carregar o catálogo. Verifique se o backend está rodando.' : '',
+    reload: () => {
+      productsQuery.refetch()
+      categoriesQuery.refetch()
+    },
     updateProduct,
     createProduct,
     uploadImage,
+    deleteProduct,
+    hasMore: Boolean(productsQuery.hasNextPage),
+    loadingMore: productsQuery.isFetchingNextPage,
+    loadMore: productsQuery.fetchNextPage,
   }
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
