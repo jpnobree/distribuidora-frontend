@@ -1,16 +1,18 @@
 import { useRef, useState } from 'react'
-import { Save, X, Upload } from 'lucide-react'
+import { Save, X, Upload, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCatalog } from '../context/CatalogContext'
+import { useToast } from '../context/ToastContext'
 import ProductImage from './ProductImage'
 
 // Formulario usado pelo ADMIN tanto para criar um produto novo quanto para
 // editar um existente (passe `product` para editar; omita para criar).
 // O slug (id do produto) so pode ser definido na criacao - depois disso fica
 // fixo, para nao quebrar o link/identificador do produto.
-export default function ProductForm({ product, onCancel, onSaved }) {
+export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
   const { token } = useAuth()
-  const { categories, updateProduct, createProduct, uploadImage } = useCatalog()
+  const { categories, updateProduct, createProduct, uploadImage, deleteProduct } = useCatalog()
+  const { showToast } = useToast()
   const isEditing = Boolean(product)
   const fileInputRef = useRef(null)
 
@@ -29,6 +31,8 @@ export default function ProductForm({ product, onCancel, onSaved }) {
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [error, setError] = useState('')
 
   function updateField(field, value) {
@@ -76,11 +80,31 @@ export default function ProductForm({ product, onCancel, onSaved }) {
       const saved = isEditing
         ? await updateProduct(product.id, payload, token)
         : await createProduct(payload, token)
+      showToast(isEditing ? 'Produto atualizado com sucesso.' : 'Produto criado com sucesso.')
       onSaved(saved)
     } catch (err) {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true)
+      return
+    }
+    setError('')
+    setDeleting(true)
+    try {
+      await deleteProduct(product.id, token)
+      showToast('Produto removido com sucesso.')
+      onDeleted?.()
+    } catch (err) {
+      setError(err.message)
+      setConfirmingDelete(false)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -260,7 +284,7 @@ export default function ProductForm({ product, onCancel, onSaved }) {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button type="submit" disabled={saving || uploading} className="btn-primary">
           <Save size={16} />
           {saving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Criar produto'}
@@ -269,6 +293,37 @@ export default function ProductForm({ product, onCancel, onSaved }) {
           <X size={16} />
           Cancelar
         </button>
+
+        {isEditing && (
+          <div className="ml-auto flex items-center gap-2">
+            {confirmingDelete && (
+              <span className="text-sm font-medium text-red-600">Excluir definitivamente?</span>
+            )}
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className={
+                confirmingDelete
+                  ? 'inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50'
+                  : 'inline-flex items-center justify-center gap-2 rounded-md border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:border-red-600'
+              }
+            >
+              <Trash2 size={16} />
+              {deleting ? 'Excluindo...' : confirmingDelete ? 'Confirmar exclusão' : 'Excluir produto'}
+            </button>
+            {confirmingDelete && (
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={deleting}
+                className="text-sm font-medium text-muted hover:text-ink"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </form>
   )
