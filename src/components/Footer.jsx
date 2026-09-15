@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import config from '../config'
 
 export default function Footer() {
@@ -7,8 +8,8 @@ export default function Footer() {
         <div>
           <p className="font-display text-xl font-semibold text-ink">{config.companyName}</p>
           <p className="mt-2 text-sm text-muted">
-            Este site é uma vitrine de produtos. Os pedidos são feitos por
-            contato direto com nosso time comercial.
+            Este site é uma vitrine de produtos. Os pedidos são feitos por contato direto com nosso
+            time comercial.
           </p>
         </div>
 
@@ -23,7 +24,11 @@ export default function Footer() {
         <div>
           <p className="text-sm font-semibold text-ink">Catálogo</p>
           <ul className="mt-2 space-y-1 text-sm text-muted">
-            <li><a href="/catalogo" className="hover:text-accent">Todos os produtos</a></li>
+            <li>
+              <Link to="/catalogo" className="hover:text-accent">
+                Todos os produtos
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

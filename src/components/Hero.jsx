@@ -12,8 +12,8 @@ export default function Hero() {
           {config.tagline}
         </h1>
         <p className="max-w-md text-sm text-white/70">
-          Navegue pelas categorias, confira preços e condições, e solicite um
-          orçamento direto com nosso time comercial — sem necessidade de cadastro.
+          Navegue pelas categorias, confira preços e condições, e solicite um orçamento direto com
+          nosso time comercial — sem necessidade de cadastro.
         </p>
         <Link to="/catalogo" className="btn-primary mt-2 w-fit">
           Ver catálogo completo

@@ -1,10 +1,16 @@
 import { RefreshCw } from 'lucide-react'
+import ProductGridSkeleton from './ProductGridSkeleton'
 
 // Estado de carregamento/erro compartilhado pelas telas que dependem do
 // catálogo vindo da API (Home e Catalog).
 export default function CatalogStatus({ loading, error, onRetry, children }) {
   if (loading) {
-    return <p className="py-16 text-center text-sm text-muted">Carregando catálogo...</p>
+    return (
+      <div role="status" aria-live="polite">
+        <span className="sr-only">Carregando catálogo...</span>
+        <ProductGridSkeleton />
+      </div>
+    )
   }
 
   if (error) {

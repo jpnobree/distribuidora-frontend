@@ -14,9 +14,7 @@ export default function ProductCard({ product, onSelect }) {
 
         {/* etiqueta de caixote — o SKU "preso" no canto do card */}
         <div className="crate-tag absolute left-0 top-0 bg-ink/85 px-2.5 py-1 pr-3">
-          <span className="font-mono text-[11px] tracking-wide text-white/90">
-            #{sku}
-          </span>
+          <span className="font-mono text-[11px] tracking-wide text-white/90">#{sku}</span>
         </div>
 
         {!available && (
@@ -46,10 +44,8 @@ export default function ProductCard({ product, onSelect }) {
           {name}
         </h3>
 
-        <div className="mt-auto flex items-end justify-between pt-1">
-          <span className="font-mono text-sm text-ink">
-            {formatPrice(price, unit)}
-          </span>
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-0.5 pt-1">
+          <span className="font-mono text-sm text-ink">{formatPrice(price, unit)}</span>
           <span className="text-xs font-medium text-muted underline-offset-2 group-hover:text-accent group-hover:underline">
             Ver detalhes
           </span>

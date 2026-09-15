@@ -5,10 +5,29 @@ const STORAGE_KEY = 'distribuidora_auth'
 
 const AuthContext = createContext(null)
 
+// So le o payload (nao valida assinatura - isso e responsabilidade do
+// backend). Usado apenas para saber "ate quando" o token vale, para
+// deslogar automaticamente na UI em vez de esperar um 401 de alguma acao.
+function decodeJwtPayload(token) {
+  try {
+    const [, payload] = token.split('.')
+    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+  } catch {
+    return null
+  }
+}
+
+function isExpired(token) {
+  const exp = decodeJwtPayload(token)?.exp
+  return typeof exp === 'number' && Date.now() >= exp * 1000
+}
+
 function readStoredAuth() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
+    const parsed = raw ? JSON.parse(raw) : null
+    if (parsed?.token && isExpired(parsed.token)) return null
+    return parsed
   } catch {
     return null
   }
@@ -24,6 +43,21 @@ export function AuthProvider({ children }) {
       localStorage.removeItem(STORAGE_KEY)
     }
   }, [auth])
+
+  // Desloga sozinho assim que o token expirar, em vez de deixar o usuario
+  // descobrir isso só quando uma acao falhar com 401/403.
+  useEffect(() => {
+    const exp = auth?.token ? decodeJwtPayload(auth.token)?.exp : null
+    if (!exp) return
+
+    const msUntilExpiry = exp * 1000 - Date.now()
+    if (msUntilExpiry <= 0) {
+      setAuth(null)
+      return
+    }
+    const timer = setTimeout(() => setAuth(null), msUntilExpiry)
+    return () => clearTimeout(timer)
+  }, [auth?.token])
 
   async function login(username, password) {
     let data
@@ -54,7 +88,8 @@ export function AuthProvider({ children }) {
 
 function loginErrorMessage(err) {
   if (!(err instanceof ApiError)) return 'Não foi possível entrar. Tente novamente.'
-  if (err.status === 0) return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
+  if (err.status === 0)
+    return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
   if (err.status === 401) return 'Usuário ou senha inválidos.'
   return 'Não foi possível entrar. Tente novamente.'
 }

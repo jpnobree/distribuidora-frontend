@@ -11,7 +11,7 @@ function renderLogin() {
       <AuthProvider>
         <Login />
       </AuthProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
@@ -21,14 +21,13 @@ beforeEach(() => {
 })
 
 describe('Login', () => {
-  test('preenche usuario e senha ao clicar em "Preencher automaticamente"', async () => {
-    const user = userEvent.setup()
+  test('nao expoe credenciais de admin padrao na tela', () => {
     renderLogin()
 
-    await user.click(screen.getByRole('button', { name: /preencher automaticamente/i }))
-
-    expect(screen.getByLabelText(/usuário/i)).toHaveValue('admin')
-    expect(screen.getByLabelText(/senha/i)).toHaveValue('admin123')
+    expect(screen.queryByText(/admin123/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /preencher automaticamente/i }),
+    ).not.toBeInTheDocument()
   })
 
   test('faz login e guarda o token quando as credenciais sao aceitas', async () => {
@@ -37,7 +36,7 @@ describe('Login', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ token: 'token-123', username: 'admin', role: 'ADMIN' }),
-      })
+      }),
     )
 
     const user = userEvent.setup()
@@ -66,9 +65,7 @@ describe('Login', () => {
     await user.type(screen.getByLabelText(/senha/i), 'admin123')
     await user.click(screen.getByRole('button', { name: /^entrar$/i }))
 
-    expect(
-      await screen.findByText(/não foi possível conectar ao servidor/i)
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/não foi possível conectar ao servidor/i)).toBeInTheDocument()
     expect(localStorage.getItem('distribuidora_auth')).toBeNull()
   })
 

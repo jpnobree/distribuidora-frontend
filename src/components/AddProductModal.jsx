@@ -1,15 +1,9 @@
-import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import ProductForm from './ProductForm'
+import { useModalA11y } from '../hooks/useModalA11y'
 
 export default function AddProductModal({ onClose, onCreated }) {
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
+  const dialogRef = useModalA11y(onClose)
 
   return (
     <div
@@ -20,11 +14,14 @@ export default function AddProductModal({ onClose, onCreated }) {
       aria-labelledby="add-product-title"
     >
       <div
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
         className="max-h-[90vh] w-full overflow-y-auto rounded-t-xl bg-surface p-6 sm:max-w-2xl sm:rounded-xl"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 id="add-product-title" className="font-display text-2xl font-semibold text-ink">Novo produto</h2>
+          <h2 id="add-product-title" className="font-display text-2xl font-semibold text-ink">
+            Novo produto
+          </h2>
           <button
             onClick={onClose}
             aria-label="Fechar"

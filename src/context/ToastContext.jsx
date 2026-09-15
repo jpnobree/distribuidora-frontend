@@ -19,7 +19,7 @@ export function ToastProvider({ children }) {
         setTimeout(() => dismiss(id), duration)
       }
     },
-    [dismiss]
+    [dismiss],
   )
 
   return (
@@ -49,7 +49,7 @@ export function ToastProvider({ children }) {
               type="button"
               onClick={() => dismiss(toast.id)}
               aria-label="Fechar aviso"
-              className="ml-1 text-muted hover:text-ink"
+              className="-m-1.5 ml-1 shrink-0 rounded p-1.5 text-muted hover:text-ink"
             >
               <X size={14} />
             </button>

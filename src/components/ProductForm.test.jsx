@@ -86,7 +86,9 @@ describe('ProductForm - modo criação', () => {
 
     await user.click(screen.getByRole('button', { name: /criar produto/i }))
 
-    expect(await screen.findByText(/já existe um produto com esse identificador/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/já existe um produto com esse identificador/i),
+    ).toBeInTheDocument()
     expect(onSaved).not.toHaveBeenCalled()
   })
 })
@@ -130,7 +132,14 @@ describe('ProductForm - modo edição', () => {
   test('excluir exige dois cliques (confirmação) antes de chamar deleteProduct', async () => {
     const user = userEvent.setup()
     const onDeleted = vi.fn()
-    render(<ProductForm product={produtoExistente} onCancel={vi.fn()} onSaved={vi.fn()} onDeleted={onDeleted} />)
+    render(
+      <ProductForm
+        product={produtoExistente}
+        onCancel={vi.fn()}
+        onSaved={vi.fn()}
+        onDeleted={onDeleted}
+      />,
+    )
 
     const deleteButton = screen.getByRole('button', { name: /excluir produto/i })
 

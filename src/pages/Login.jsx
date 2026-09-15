@@ -3,10 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-// Credenciais do admin padrão criado automaticamente pelo backend
-// (ver distribuidora-backend: app.seed.admin-username/admin-password).
-const DEFAULT_ADMIN = { username: 'admin', password: 'admin123' }
-
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -29,12 +25,6 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
-  }
-
-  function fillDefaultAdmin() {
-    setUsername(DEFAULT_ADMIN.username)
-    setPassword(DEFAULT_ADMIN.password)
-    setError('')
   }
 
   return (
@@ -84,16 +74,6 @@ export default function Login() {
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
-
-      <div className="rounded-md border border-dashed border-border bg-surface p-3 text-center text-xs text-muted">
-        <p>
-          Login de admin padrão: <code className="font-mono">admin</code> /{' '}
-          <code className="font-mono">admin123</code>
-        </p>
-        <button type="button" onClick={fillDefaultAdmin} className="mt-2 font-medium text-accent underline-offset-2 hover:underline">
-          Preencher automaticamente
-        </button>
-      </div>
     </div>
   )
 }

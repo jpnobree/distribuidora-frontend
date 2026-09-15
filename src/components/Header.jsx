@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Search, Phone, LogIn, LogOut, ShieldCheck, LayoutDashboard } from 'lucide-react'
 import config from '../config'
 import { useAuth } from '../context/AuthContext'
@@ -25,9 +25,9 @@ export default function Header() {
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-4">
-        <a href="/" className="font-display text-2xl font-semibold tracking-tight text-ink">
+        <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-ink">
           {config.companyName}
-        </a>
+        </Link>
 
         <form onSubmit={handleSubmit} className="ml-auto flex min-w-[200px] flex-1 max-w-md">
           <input
@@ -69,7 +69,11 @@ export default function Header() {
             </button>
           </div>
         ) : (
-          <button type="button" onClick={() => navigate('/login')} className="btn-secondary px-3 py-1.5 text-sm">
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="btn-secondary px-3 py-1.5 text-sm"
+          >
             <LogIn size={14} />
             Entrar
           </button>

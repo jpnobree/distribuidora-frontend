@@ -1,21 +1,63 @@
 <!doctype html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Frios | Vitrine</title>
+    <meta
+      name="description"
+      content="Catálogo de produtos da distribuidora — consulte itens, categorias e preços."
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Real Frios | Vitrine</title>
-  <meta name="description" content="Catálogo de produtos da distribuidora — consulte itens, categorias e preços." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-    rel="stylesheet" />
-</head>
+    <!-- Favicon provisorio (iniciais + cor de marca de src/index.css). Troque
+       por um arquivo real quando a identidade visual (logo) for definida -
+       ver "Identidade visual" no README. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+    <!-- Open Graph / Twitter Card: como e usado ao compartilhar um link do
+       site (ex: no WhatsApp). og:image usa uma foto de produto existente
+       como placeholder - troque por uma imagem de marca (logo/banner)
+       quando houver uma. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Real Frios" />
+    <meta property="og:title" content="Real Frios | Vitrine de produtos" />
+    <meta
+      property="og:description"
+      content="Catálogo de produtos da distribuidora — consulte itens, categorias e preços, e solicite orçamento pelo WhatsApp."
+    />
+    <meta property="og:image" content="/images/picanha-argentina.png" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Real Frios | Vitrine de produtos" />
+    <meta
+      name="twitter:description"
+      content="Catálogo de produtos da distribuidora — consulte itens, categorias e preços, e solicite orçamento pelo WhatsApp."
+    />
+    <meta name="twitter:image" content="/images/picanha-argentina.png" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Dados estruturados basicos para SEO local. Complete com endereco real
+       (streetAddress, addressLocality etc.) quando disponivel. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Real Frios",
+        "telephone": "(85) 98717-8721",
+        "email": "realfrios.jp@hotmail.com",
+        "priceRange": "$$"
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

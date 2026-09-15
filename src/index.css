@@ -5,20 +5,34 @@
 /* ==========================================================================
    TEMA — troque só estas variáveis quando a identidade visual for definida.
    Nada mais no projeto precisa mudar: cards, botões, tags etc. leem daqui.
+
+   Formato: "R G B" (canais 0-255 separados por espaço, SEM "#" e SEM
+   "rgb(...)"), não hex. É o que o tailwind.config.js precisa para aplicar
+   opacidade nessas cores (ex: bg-ink/60, bg-gold/10) - com hex direto
+   (`#1f2420`) o Tailwind não consegue decompor os canais e a classe com
+   opacidade não gera CSS nenhum (bug real encontrado em produção: os dois
+   modais de produto ficavam sem nenhum escurecimento atrás). Para converter
+   um hex novo: #RRGGBB -> cada par em decimal, ex. #3f5b45 -> "63 91 69".
    ========================================================================== */
 :root {
-  --color-bg: #f5f5f2;         /* fundo geral da página */
-  --color-surface: #ffffff;    /* fundo de cards e superfícies */
-  --color-ink: #1f2420;        /* texto principal */
-  --color-muted: #6b6f68;      /* texto secundário */
-  --color-border: #e4e1d8;     /* linhas e bordas sutis */
-  --color-accent: #3f5b45;     /* cor de marca — botões, links, destaques */
-  --color-accent-ink: #ffffff; /* texto sobre a cor de marca */
-  --color-gold: #b08d57;       /* selo "premium" / destaque secundário */
+  --color-bg: 245 245 242; /* fundo geral da página (#f5f5f2) */
+  --color-surface: 255 255 255; /* fundo de cards e superfícies (#ffffff) */
+  --color-ink: 31 36 32; /* texto principal (#1f2420) */
+  --color-muted: 107 111 104; /* texto secundário (#6b6f68) */
+  --color-border: 228 225 216; /* linhas e bordas sutis (#e4e1d8) */
+  --color-accent: 63 91 69; /* cor de marca — botões, links, destaques (#3f5b45) */
+  --color-accent-ink: 255 255 255; /* texto sobre a cor de marca (#ffffff) */
+  --color-gold: 125 99 59; /* selo "premium" / destaque secundário (#7d633b) - escurecido p/ passar 4.5:1 como texto (ver auditoria) */
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
