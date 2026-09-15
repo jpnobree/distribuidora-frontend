@@ -6,23 +6,17 @@ import { formatPrice, whatsappLink } from '../utils/format'
 import config from '../config'
 import { useCatalog } from '../context/CatalogContext'
 import { useAuth } from '../context/AuthContext'
+import { useModalA11y } from '../hooks/useModalA11y'
 
 export default function ProductModal({ product, onClose }) {
   const { categories } = useCatalog()
   const { isAdmin } = useAuth()
   const [editing, setEditing] = useState(false)
+  const dialogRef = useModalA11y(onClose, Boolean(product))
 
   useEffect(() => {
     setEditing(false)
   }, [product])
-
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
 
   if (!product) return null
 
@@ -38,6 +32,7 @@ export default function ProductModal({ product, onClose }) {
       aria-label={product.name}
     >
       <div
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
         className="max-h-[90vh] w-full overflow-y-auto rounded-t-xl bg-surface sm:max-w-2xl sm:rounded-xl"
       >

@@ -5,6 +5,10 @@ import { useCatalog } from '../context/CatalogContext'
 import { useToast } from '../context/ToastContext'
 import ProductImage from './ProductImage'
 
+// 5MB - so limita o que a UI aceita antes de gastar tempo de upload; o
+// backend e quem decide o limite real e o que aceitar de fato.
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+
 // Formulario usado pelo ADMIN tanto para criar um produto novo quanto para
 // editar um existente (passe `product` para editar; omita para criar).
 // O slug (id do produto) so pode ser definido na criacao - depois disso fica
@@ -45,6 +49,12 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
     if (!file) return
 
     setError('')
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError('Imagem muito grande. O tamanho máximo é 5MB.')
+      return
+    }
+
     setUploading(true)
     try {
       const url = await uploadImage(file, token)
@@ -114,7 +124,10 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         {!isEditing && (
           <div className="col-span-2">
             <label htmlFor="product-slug" className="mb-1 block text-sm font-medium text-ink">
-              Identificador <span className="font-normal text-muted">(único, sem espaços, ex: picanha-premium-98562)</span>
+              Identificador{' '}
+              <span className="font-normal text-muted">
+                (único, sem espaços, ex: picanha-premium-98562)
+              </span>
             </label>
             <input
               id="product-slug"
@@ -129,7 +142,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         )}
 
         <div className="col-span-2">
-          <label htmlFor="product-name" className="mb-1 block text-sm font-medium text-ink">Nome</label>
+          <label htmlFor="product-name" className="mb-1 block text-sm font-medium text-ink">
+            Nome
+          </label>
           <input
             id="product-name"
             type="text"
@@ -141,7 +156,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div>
-          <label htmlFor="product-sku" className="mb-1 block text-sm font-medium text-ink">SKU</label>
+          <label htmlFor="product-sku" className="mb-1 block text-sm font-medium text-ink">
+            SKU
+          </label>
           <input
             id="product-sku"
             type="text"
@@ -153,7 +170,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div>
-          <label htmlFor="product-category" className="mb-1 block text-sm font-medium text-ink">Categoria</label>
+          <label htmlFor="product-category" className="mb-1 block text-sm font-medium text-ink">
+            Categoria
+          </label>
           <select
             id="product-category"
             value={form.category}
@@ -170,7 +189,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div>
-          <label htmlFor="product-unit" className="mb-1 block text-sm font-medium text-ink">Unidade</label>
+          <label htmlFor="product-unit" className="mb-1 block text-sm font-medium text-ink">
+            Unidade
+          </label>
           <input
             id="product-unit"
             type="text"
@@ -183,7 +204,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div>
-          <label htmlFor="product-price" className="mb-1 block text-sm font-medium text-ink">Preço (R$)</label>
+          <label htmlFor="product-price" className="mb-1 block text-sm font-medium text-ink">
+            Preço (R$)
+          </label>
           <input
             id="product-price"
             type="number"
@@ -249,7 +272,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div className="col-span-2">
-          <label htmlFor="product-description" className="mb-1 block text-sm font-medium text-ink">Descrição</label>
+          <label htmlFor="product-description" className="mb-1 block text-sm font-medium text-ink">
+            Descrição
+          </label>
           <textarea
             id="product-description"
             value={form.description}
@@ -259,7 +284,9 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
         </div>
 
         <div>
-          <label htmlFor="product-origin" className="mb-1 block text-sm font-medium text-ink">Origem</label>
+          <label htmlFor="product-origin" className="mb-1 block text-sm font-medium text-ink">
+            Origem
+          </label>
           <input
             id="product-origin"
             type="text"
@@ -310,7 +337,11 @@ export default function ProductForm({ product, onCancel, onSaved, onDeleted }) {
               }
             >
               <Trash2 size={16} />
-              {deleting ? 'Excluindo...' : confirmingDelete ? 'Confirmar exclusão' : 'Excluir produto'}
+              {deleting
+                ? 'Excluindo...'
+                : confirmingDelete
+                  ? 'Confirmar exclusão'
+                  : 'Excluir produto'}
             </button>
             {confirmingDelete && (
               <button

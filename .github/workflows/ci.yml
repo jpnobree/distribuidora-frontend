@@ -15,11 +15,14 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
 
       - name: Testes (Vitest)
         run: npm test
