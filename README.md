@@ -30,6 +30,7 @@ Pressupõe que o backend está rodando (via `docker compose up` no repositório
 ### Opção 2 — Node local
 
 Pré-requisitos:
+
 - [Node.js](https://nodejs.org) 18 ou mais recente instalado.
 - O backend (`distribuidora-backend`) rodando — sem ele, o catálogo mostra
   uma mensagem de erro em vez dos produtos.
@@ -61,9 +62,9 @@ npm test           # roda uma vez
 npm run test:watch # modo observador, roda de novo a cada save
 ```
 
-| Arquivo | O que é coberto |
-|---|---|
-| `Login.test.jsx` | preencher credenciais padrão, login com sucesso, backend fora do ar, credenciais inválidas |
+| Arquivo                | O que é coberto                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Login.test.jsx`       | não expor credenciais padrão na tela, login com sucesso, backend fora do ar, credenciais inválidas         |
 | `ProductForm.test.jsx` | criação, edição, erro do backend, cancelar, **exclusão com confirmação em dois cliques**, toast de sucesso |
 
 Validado manualmente também contra o stack real via Docker (backend +

@@ -62,7 +62,9 @@ export default function FilterBar({
             return (
               <button
                 key={tag}
+                type="button"
                 onClick={() => onToggleTag(tag)}
+                aria-pressed={active}
                 className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide transition-colors ${
                   active
                     ? 'border-accent bg-accent text-accent-ink'

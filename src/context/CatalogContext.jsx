@@ -44,8 +44,10 @@ export function CatalogProvider({ children }) {
       return await updateProductMutation.mutateAsync({ slug, payload, token })
     } catch (err) {
       throw new Error(
-        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para editar produtos.') ??
-          'Não foi possível salvar as alterações. Tente novamente.'
+        authOrNetworkMessage(
+          err,
+          'Sua sessão expirou ou você não tem permissão para editar produtos.',
+        ) ?? 'Não foi possível salvar as alterações. Tente novamente.',
       )
     }
   }
@@ -55,10 +57,13 @@ export function CatalogProvider({ children }) {
       return await createProductMutation.mutateAsync({ payload, token })
     } catch (err) {
       throw new Error(
-        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para criar produtos.') ??
+        authOrNetworkMessage(
+          err,
+          'Sua sessão expirou ou você não tem permissão para criar produtos.',
+        ) ??
           (err instanceof ApiError && err.status === 409
             ? 'Já existe um produto com esse identificador. Escolha outro.'
-            : 'Não foi possível criar o produto. Tente novamente.')
+            : 'Não foi possível criar o produto. Tente novamente.'),
       )
     }
   }
@@ -71,9 +76,12 @@ export function CatalogProvider({ children }) {
       return data.url
     } catch (err) {
       throw new Error(
-        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para enviar imagens.') ??
+        authOrNetworkMessage(
+          err,
+          'Sua sessão expirou ou você não tem permissão para enviar imagens.',
+        ) ??
           (err instanceof ApiError && err.data?.error) ??
-          'Não foi possível enviar a imagem. Tente novamente.'
+          'Não foi possível enviar a imagem. Tente novamente.',
       )
     }
   }
@@ -83,8 +91,10 @@ export function CatalogProvider({ children }) {
       await api.delete(`/api/products/${slug}`, { token })
     } catch (err) {
       throw new Error(
-        authOrNetworkMessage(err, 'Sua sessão expirou ou você não tem permissão para remover produtos.') ??
-          'Não foi possível remover o produto. Tente novamente.'
+        authOrNetworkMessage(
+          err,
+          'Sua sessão expirou ou você não tem permissão para remover produtos.',
+        ) ?? 'Não foi possível remover o produto. Tente novamente.',
       )
     }
     invalidateProducts()
@@ -92,13 +102,26 @@ export function CatalogProvider({ children }) {
 
   const products = productsQuery.data?.pages.flatMap((page) => page.content) ?? []
   const isLoading = productsQuery.isLoading || categoriesQuery.isLoading
-  const isError = productsQuery.isError || categoriesQuery.isError
+
+  // TanStack Query (networkMode: 'online', o padrao) "pausa" a query em vez
+  // de marcar como erro quando acha que o navegador esta offline - nesse
+  // caso, tanto isLoading quanto isError ficam false (fetchStatus="paused",
+  // status="pending"), e sem esse cuidado a tela renderiza como se o
+  // catalogo tivesse 0 produtos de verdade, escondendo o problema real.
+  const isStuckOffline = (query) => query.status === 'pending' && query.fetchStatus === 'paused'
+  const isError =
+    productsQuery.isError ||
+    categoriesQuery.isError ||
+    isStuckOffline(productsQuery) ||
+    isStuckOffline(categoriesQuery)
 
   const value = {
     products,
     categories: categoriesQuery.data ?? [],
     loading: isLoading,
-    error: isError ? 'Não foi possível carregar o catálogo. Verifique se o backend está rodando.' : '',
+    error: isError
+      ? 'Não foi possível carregar o catálogo. Verifique sua conexão ou se o backend está rodando.'
+      : '',
     reload: () => {
       productsQuery.refetch()
       categoriesQuery.refetch()
@@ -120,7 +143,8 @@ export function CatalogProvider({ children }) {
 // decidir a mensagem especifica daquele endpoint.
 function authOrNetworkMessage(err, forbiddenMessage) {
   if (!(err instanceof ApiError)) return null
-  if (err.status === 0) return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
+  if (err.status === 0)
+    return 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.'
   if (err.status === 401 || err.status === 403) return forbiddenMessage
   return null
 }
