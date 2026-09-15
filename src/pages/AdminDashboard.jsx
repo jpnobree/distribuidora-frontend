@@ -1,24 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import { Navigate } from 'react-router-dom'
 import { Package, PackageX, LayoutGrid, MessagesSquare } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCatalog } from '../context/CatalogContext'
 import { api } from '../api/client'
 
+// Acesso a esta pagina ja e restrito a ADMIN por <ProtectedRoute> em App.jsx.
 export default function AdminDashboard() {
-  const { isAdmin, token } = useAuth()
+  const { token } = useAuth()
   const { products, categories } = useCatalog()
 
   const contactsQuery = useQuery({
     queryKey: ['contacts', 'all'],
     queryFn: () => api.get('/api/contacts', { token }),
-    enabled: isAdmin,
   })
-
-  // so ADMIN acessa - qualquer outro visitante volta pra home.
-  if (!isAdmin) {
-    return <Navigate to="/" replace />
-  }
 
   const totalProdutos = products.length
   const indisponiveis = products.filter((p) => !p.available).length
@@ -59,10 +53,14 @@ export default function AdminDashboard() {
                 <div className="h-2 flex-1 rounded-full bg-border" aria-hidden="true">
                   <div
                     className="h-2 rounded-full bg-accent"
-                    style={{ width: totalProdutos ? `${(cat.total / totalProdutos) * 100}%` : '0%' }}
+                    style={{
+                      width: totalProdutos ? `${(cat.total / totalProdutos) * 100}%` : '0%',
+                    }}
                   />
                 </div>
-                <span className="w-6 shrink-0 text-right font-mono text-sm text-muted">{cat.total}</span>
+                <span className="w-6 shrink-0 text-right font-mono text-sm text-muted">
+                  {cat.total}
+                </span>
               </div>
             ))}
           </div>

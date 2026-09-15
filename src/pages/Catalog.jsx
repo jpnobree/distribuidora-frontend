@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Plus, ChevronDown } from 'lucide-react'
 import FilterBar from '../components/FilterBar'
@@ -28,7 +28,8 @@ export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selected, setSelected] = useState(null)
   const [creating, setCreating] = useState(false)
-  const { products, categories, loading, error, reload, hasMore, loadingMore, loadMore } = useCatalog()
+  const { products, categories, loading, error, reload, hasMore, loadingMore, loadMore } =
+    useCatalog()
   const { isAdmin } = useAuth()
 
   const activeCategory = searchParams.get('categoria') || ''
@@ -37,7 +38,7 @@ export default function Catalog() {
   const onlyAvailable = searchParams.get('disponivel') === '1'
   const activeTags = useMemo(
     () => (searchParams.get('tags') ? searchParams.get('tags').split(',') : []),
-    [searchParams]
+    [searchParams],
   )
 
   const updateParams = useCallback(
@@ -49,17 +50,17 @@ export default function Catalog() {
       })
       setSearchParams(next, { replace: true })
     },
-    [searchParams, setSearchParams]
+    [searchParams, setSearchParams],
   )
 
   const categoryProducts = useMemo(
     () => (activeCategory ? products.filter((p) => p.category === activeCategory) : products),
-    [activeCategory, products]
+    [activeCategory, products],
   )
 
   const allTags = useMemo(
     () => [...new Set(categoryProducts.flatMap((p) => p.tags || []))].sort(),
-    [categoryProducts]
+    [categoryProducts],
   )
 
   const filtered = useMemo(() => {
@@ -67,9 +68,7 @@ export default function Catalog() {
 
     if (search.trim()) {
       const q = search.trim().toLowerCase()
-      list = list.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-      )
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q))
     }
 
     if (activeTags.length > 0) {
@@ -84,6 +83,22 @@ export default function Catalog() {
   }, [categoryProducts, search, activeTags, onlyAvailable, sort])
 
   const activeCategoryName = categories.find((c) => c.slug === activeCategory)?.name
+
+  // Busca, categoria, tags e "somente disponiveis" filtram sobre `products`,
+  // que so contem as paginas ja buscadas do backend (useInfiniteQuery). Sem
+  // isso, um produto que exista mas ainda nao tenha sido paginado pareceria
+  // "nao encontrado" so por nao ter sido carregado ainda. Enquanto algum
+  // desses filtros estiver ativo, busca automaticamente o resto do catalogo
+  // para que o filtro sempre opere sobre o catalogo inteiro.
+  const filtersActive = Boolean(
+    activeCategory || search.trim() || activeTags.length > 0 || onlyAvailable,
+  )
+
+  useEffect(() => {
+    if (filtersActive && hasMore && !loadingMore) {
+      loadMore()
+    }
+  }, [filtersActive, hasMore, loadingMore, loadMore])
 
   function toggleTag(tag) {
     const next = activeTags.includes(tag)
@@ -125,16 +140,23 @@ export default function Catalog() {
         />
 
         <div className="pt-6">
-          {filtered.length > 0 ? (
+          {filtersActive && hasMore ? (
+            <p className="py-16 text-center text-sm text-muted">Buscando em todo o catálogo...</p>
+          ) : filtered.length > 0 ? (
             <ProductGrid products={filtered} onSelect={setSelected} />
           ) : (
             <EmptyState onClear={clearFilters} />
           )}
         </div>
 
-        {hasMore && (
+        {!filtersActive && hasMore && (
           <div className="flex justify-center pt-8">
-            <button type="button" onClick={() => loadMore()} disabled={loadingMore} className="btn-secondary">
+            <button
+              type="button"
+              onClick={() => loadMore()}
+              disabled={loadingMore}
+              className="btn-secondary"
+            >
               <ChevronDown size={16} />
               {loadingMore ? 'Carregando...' : 'Carregar mais produtos'}
             </button>
