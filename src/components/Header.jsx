@@ -25,8 +25,8 @@ export default function Header() {
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-4">
-        <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-ink">
-          {config.companyName}
+        <Link to="/" aria-label={config.companyName}>
+          <img src="/logo.svg" alt={config.companyName} className="h-9 w-auto sm:h-10" />
         </Link>
 
         <form onSubmit={handleSubmit} className="ml-auto flex min-w-[200px] flex-1 max-w-md">
