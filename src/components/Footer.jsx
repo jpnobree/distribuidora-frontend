@@ -6,8 +6,8 @@ export default function Footer() {
     <footer className="mt-16 border-t border-border bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
-          <p className="font-display text-xl font-semibold text-ink">{config.companyName}</p>
-          <p className="mt-2 text-sm text-muted">
+          <img src="/logo.svg" alt={config.companyName} className="h-8 w-auto" />
+          <p className="mt-3 text-sm text-muted">
             Este site é uma vitrine de produtos. Os pedidos são feitos por contato direto com nosso
             time comercial.
           </p>

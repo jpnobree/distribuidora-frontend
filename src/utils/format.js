@@ -35,8 +35,8 @@ function themeColor(varName, fallback) {
 function placeholderPalette() {
   if (!cachedPalette) {
     cachedPalette = [
-      themeColor('--color-accent', '63 91 69'),
-      themeColor('--color-gold', '125 99 59'),
+      themeColor('--color-accent', '90 31 51'),
+      themeColor('--color-gold', '125 102 50'),
       themeColor('--color-muted', '107 111 104'),
     ]
   }
