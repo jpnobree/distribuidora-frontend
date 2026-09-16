@@ -6,7 +6,7 @@ const config = {
 
   // Endereço do backend (projeto distribuidora-backend). Vem da variável de
   // ambiente VITE_API_BASE_URL (ver .env / .env.example) — troque lá, não aqui.
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://distribuidora-backend-f476.onrender.com',
 
   // Usado no botão "Solicitar orçamento" dos produtos (formato internacional,
   // só números). Deixe vazio ('') para esconder o botão de WhatsApp.
