@@ -7,6 +7,15 @@ export function formatPrice(price, unit) {
   return unit ? `${value} / ${unit}` : value
 }
 
+// Estoque que o cliente ve: arredonda para baixo (nunca promete o que nao
+// tem) e trata sobra de balanca abaixo de 1 unidade como sem estoque.
+export function formatStock(stock, unit) {
+  if (stock === null || stock === undefined) return null
+  const whole = Math.floor(stock)
+  if (whole < 1) return 'Sem estoque'
+  return `${whole.toLocaleString('pt-BR')}${unit ? ` ${unit}` : ''} em estoque`
+}
+
 export function whatsappLink(number, productName) {
   if (!number) return null
   const text = encodeURIComponent(`Olá! Gostaria de solicitar um orçamento para: ${productName}`)
