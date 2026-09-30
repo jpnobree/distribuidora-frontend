@@ -83,18 +83,24 @@ export default function ProductModal({ product, onClose }) {
 
               <p className="text-sm leading-relaxed text-ink/80">{product.description}</p>
 
-          <dl className="grid grid-cols-2 gap-4 border-y border-border py-4 text-sm">
-            <div>
-              <dt className="text-muted">Preço</dt>
-              <dd className="font-mono font-medium text-ink">
-                {formatPrice(product.price, product.unit)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted">Origem</dt>
-              <dd className="font-medium text-ink">{product.origin || '—'}</dd>
-            </div>
-          </dl>
+                        <dl className="grid grid-cols-2 gap-4 border-y border-border py-4 text-sm">
+                <div>
+                  <dt className="text-muted">Preço</dt>
+                  <dd className="font-mono font-medium text-ink">
+                    {formatPrice(product.price, product.unit)}
+                  </dd>
+                </div>
+                {formatStock(product.stock, product.unit) && (
+                  <div>
+                    <dt className="text-muted">Estoque</dt>
+                    <dd className="font-medium text-ink">{formatStock(product.stock, product.unit)}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="text-muted">Origem</dt>
+                  <dd className="font-medium text-ink">{product.origin || '—'}</dd>
+                </div>
+              </dl>
 
               {isAdmin ? (
                 <button type="button" onClick={() => setEditing(true)} className="btn-primary">
