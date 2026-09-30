@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { X, MessageCircle, Pencil } from 'lucide-react'
 import ProductImage from './ProductImage'
 import ProductForm from './ProductForm'
-import { formatPrice, whatsappLink } from '../utils/format'
+import { formatPrice, formatStock, whatsappLink } from '../utils/format'
 import config from '../config'
 import { useCatalog } from '../context/CatalogContext'
 import { useAuth } from '../context/AuthContext'
@@ -83,18 +83,18 @@ export default function ProductModal({ product, onClose }) {
 
               <p className="text-sm leading-relaxed text-ink/80">{product.description}</p>
 
-              <dl className="grid grid-cols-2 gap-4 border-y border-border py-4 text-sm">
-                <div>
-                  <dt className="text-muted">Preço</dt>
-                  <dd className="font-mono font-medium text-ink">
-                    {formatPrice(product.price, product.unit)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Origem</dt>
-                  <dd className="font-medium text-ink">{product.origin || '—'}</dd>
-                </div>
-              </dl>
+          <dl className="grid grid-cols-2 gap-4 border-y border-border py-4 text-sm">
+            <div>
+              <dt className="text-muted">Preço</dt>
+              <dd className="font-mono font-medium text-ink">
+                {formatPrice(product.price, product.unit)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted">Origem</dt>
+              <dd className="font-medium text-ink">{product.origin || '—'}</dd>
+            </div>
+          </dl>
 
               {isAdmin ? (
                 <button type="button" onClick={() => setEditing(true)} className="btn-primary">

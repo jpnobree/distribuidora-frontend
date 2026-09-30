@@ -1,8 +1,9 @@
 import ProductImage from './ProductImage'
-import { formatPrice } from '../utils/format'
+import { formatPrice, formatStock } from '../utils/format'
 
 export default function ProductCard({ product, onSelect }) {
-  const { name, sku, unit, price, tags, image, available } = product
+  const { name, sku, unit, price, tags, image, available, stock } = product
+  const stockLabel = formatStock(stock, unit)
 
   return (
     <button
@@ -43,6 +44,10 @@ export default function ProductCard({ product, onSelect }) {
         <h3 className="font-display text-lg font-medium leading-tight text-ink group-hover:text-accent">
           {name}
         </h3>
+
+        {stockLabel && (
+          <p className={`text-xs font-medium ${stock >= 1 ? 'text-muted' : 'text-accent'}`}>{stockLabel}</p>
+        )}
 
         <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-0.5 pt-1">
           <span className="font-mono text-sm text-ink">{formatPrice(price, unit)}</span>
